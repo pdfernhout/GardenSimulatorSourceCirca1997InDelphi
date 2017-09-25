@@ -1,0 +1,1684 @@
+=========================================================== 
+Programmer's Guide for Garden with Insight(TM) source code version 1.0. 
+http://www.gardenwithinsight.com 
+=========================================================== 
+  
+======== License  
+  
+This software program, including all documentation, Delphi source code, and data  
+files, is  
+Copyright (c) 1997 Paul D. Fernhout and Cynthia F. Kurtz All Rights Reserved.  
+Garden with Insight™ is a trademark of Paul D. Fernhout and Cynthia F. Kurtz. 
+  
+This program is free software; you can redistribute it and/or  
+modify it under the terms of the GNU General Public License  
+as published by the Free Software Foundation; either version 2  
+of the License, or (at your option) any later version.  
+  
+This program is distributed in the hope that it will be useful,  
+but WITHOUT ANY WARRANTY; without even the implied warranty of  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the  
+GNU General Public License for more details.  
+  
+You should have received a copy of the GNU General Public License  
+along with this program; if not, write to the Free Software  
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+  
+======== For more information, contact:  
+  
+Kurtz-Fernhout Software  
+http://www.gardenwithinsight.com  
+support@gardenwithinsight.com  
+  
+======== Introduction 
+ 
+Thank you for downloading this source code base. This introduction will cover 1)  
+what we have done in making this software, 2) what you might get out of using this  
+source code, and 3) future directions in which we would like to see this software and  
+source code base develop. 
+ 
+== What we have done 
+ 
+* We translated EPIC from FORTRAN to Pascal. The EPIC (Erosion/Productivity  
+Impact Calculator) model represents decades of solid scientific research, and is  
+freely available, well validated and respected. But its 17,500 lines of FORTRAN  
+source code are dense and difficult to understand. One of us spent nearly a year  
+laboriously translating each line of FORTRAN code to readable Pascal. One of the  
+main reasons we are releasing this source code is that we hope our translation work  
+will create some positive feedback in the agricultural science community. Also,  
+because we are not soil scientists (our backgrounds are in Ecology), we feel some  
+interaction with the soil science community would benefit the source code and make  
+the product a better educational resource. 
+ 
+* During translation we made the EPIC code much more readable. One of the  
+changes we made while translating EPIC from FORTRAN is this: we greatly  
+expanded all variable names. For example, the variable "xi" might become  
+"percolationThisLayer_mm". We also rearranged several arrays of parameters that  
+were designated only by indexes into data structures with complete names for each  
+field (e.g., "smy4" became "params. fractionOfIrrigationWaterLostToRunoff").  
+Each variable in the GWI code has a unit suffix after an underscore. Such obvious  
+unit designations make it easier to work out the units in each equation and  
+understand conversion constants (which otherwise are "magic numbers"). Here is a  
+comparison of some EPIC code with the GWI code it was translated to: 
+ 
+EPIC: ST=ST+RFV-QD 
+GWI: waterContent_mm := waterContent_mm + rainfallAndIrrigation_mm -  
+totalRunoff_mm 
+ 
+Granted, the EPIC code is much shorter; but finding out what "RFV" and "QD"  
+mean can literally take all day. And you can see right away in the GWI code that all  
+the units match up. This renaming makes the source code so much more readable  
+that it may prove to be the most important part of the project. 
+ 
+* We changed EPIC to make it fit a home garden with multiple plants and multiple  
+soil patches. The biggest difference between EPIC and Garden with Insight(TM) is  
+this: EPIC models one field and one crop only, and GWI models multiple soil  
+patches with multiple plants (of any species) in each soil patch. Soil patches in GWI  
+do not communicate, so that part of the model is like several EPIC models side by  
+side. But GWI plants do compete for water and nutrients within each soil patch (but  
+not for sunlight). We also made other changes from the original EPIC code, mainly  
+the following: 1) we added a plant biomass allocation model more complex than  
+EPIC's, so we could model individual harvested fruits; 2) we removed the pesticide  
+movement and economic model components (the reason for removing pesticides is  
+discussed later in this document); and 3) we encapsulated the EPIC code into  
+objects which interact (though this object-oriented approach could have been taken  
+much further). 
+ 
+Please note that we do not believe we have done a better job than EPIC at  
+simulating a complex situation. In fact, we may have introduced all sorts of errors  
+in the changes we have made. We made these changes only to make the simulation  
+better fit our goal of simulating a home garden. To make our changes we surveyed  
+existing models and theory in the research literature. Some significant gaps remain,  
+which we will discuss later in this document.  
+ 
+== What you might get out of the source code 
+ 
+Our hope in releasing this source code is that it will draw a community of users who  
+will help us improve the simulation to make it more accurate and educational. Here  
+are some reasons you might want to join us in this community. 
+ 
+* You can study the model to learn soil science, plant growth, hydrology, etc. If you  
+are using the simulation to learn, you can use the source code to go deeper into  
+these subjects than you can by using the simulation. Why use the source code to  
+learn? 
+- You can get a better understanding of the vocabulary. 
+- You can get a better look at how science really moves forward (by building on  
+successive generations of research and thought) than you can by reading a textbook. 
+- You can see how a modeling effort starts and grows, and what difficult decisions  
+are made along the way. 
+- You can get a better understanding of some complex concepts like how the soil  
+texture affects the percolation of water through the soil, or how soil cover affects  
+soil temperature, by following through all the calculations that impact the outcomes. 
+- You can learn to look critically at scientific modeling and research by comparing  
+the model to other models and published data, and deciding what you think is  
+lacking or inaccurate. 
+ 
+* You can expand the simulation to cover an area of interest to you. Several areas of  
+the simulation are sketchy and would benefit from development, such as pH, soil  
+biology, etc (see below). By filling in these areas you can use the simulation as a  
+background for testing equations and ideas. Writing a new section of equations  
+really involves you in learning about your subject -- reading up on the literature,  
+getting a handle on the important concepts, coming up with the best way to simulate  
+the new topic with the competing demands of simplicity and accuracy, integrating  
+the new area with the existing equations and variables. In the same way that  
+teaching about a subject is a great way to learn about it, creating a new submodel is  
+a great way to test and develop your knowledge in a particular area. Of course, you  
+can also use portions of the simulation in other models (see the license for  
+restrictions). 
+ 
+* You can use the simulation in science classes. If you are a science teacher at the  
+secondary or post- secondary level, you can can use GWI with the source code as a  
+foundation for a group or individual project in many areas, including soil science,  
+plant growth, meterology, geology, hydrology, environmental issues, mathematics,  
+chemistry, and programming. Using the simulation with source code is not  
+something you can squeeze into short class periods or restrictive curricula. But if  
+you have some time and freedom to experiment -- if your students want to do some  
+after-class exploring, or if you have some lab sections or a long-term project that  
+allow some unstructured time, there are many possibilities you can explore. 
+ 
+To mention just a few quick ideas, you can ask your students to: 
+- add a new section of equations (such as a potassium model) based on library  
+research, or plan out the addition in pseudocode, and write documentation  
+explaining how the section works and why they wrote it the way they did; 
+- critique one section of the source code based on library research using the  
+references cited and other literature in the field, and write a paper in a format  
+acceptable to current scientific journals; 
+- compare the results of one component of the simulation (such as the simulation of  
+precipitation or water movement through the soil) with real research data to validate  
+the model in that respect, and prepare a report on how well that part of the  
+simulation matches reality; 
+- do a physical experiment that duplicates some part of the simulation (like water  
+moving through a column of soil, or the relative weights of different plant parts)  
+and explain how the simulation accurately portrays the reality of the experiment and  
+how it doesn't; 
+- write a short textbook chapter on one set of model equations for students in a  
+lower grade level using simple language and building vocabulary from words  
+students in those classes might know already. 
+ 
+== Future directions 
+ 
+* Our dream is to develop this program into a version 2.0 system that has these  
+elements: 
+ 
+- a strong base of understandable source code that becomes a standard for  
+educational science simulation; 
+- an open modeling system that allows easy sharing of model components and  
+communication of ideas; 
+- a learning environment for modeling that allows users to start with simple models  
+and work their way up to more complex understandings; 
+- an object-oriented database system for easy sharing of model data throughout  
+changes in the model; 
+- a strong user community of academic researchers, teachers, students, and  
+interested amateurs who collaborate on improving the system for educational and  
+research use; 
+- educational resources such as lesson plans and project ideas contributed to and  
+used by many educators. 
+ 
+We submitted a National Science Foundation grant pre-proposal in the spring of  
+1997 to this effect (a copy of the proposal can be found on our web site). The NSF's  
+response was something like: "We don't understand why you don't want to sell the  
+program commercially." We don't want to sell the program as proprietary software  
+because 1) we would like the source code to be used and improved by others; and 2)  
+we don't have the time and money to market the program. Our hope is that someday  
+we may get to the version 2.0 modeling environment another way: through the help  
+of many interested individuals. 
+ 
+We invite you to participate in this community. You can participate by reading the  
+source code, by tinkering with it, by researching it, by making changes, by talking  
+about it, by using it, by improving it. 
+ 
+* Specific parts of the program that could use improvement are as follows. 
+  
+In the weather model,  
+- a better way to characterize, describe and choose microclimates as distinct from  
+the climate in an area;  
+- more climate data for areas outside the US;  
+- a better way of displaying and choosing climates rather than point sources from  
+weather stations, as with maps showing areas of variables such as temperature that  
+fall inside certain ranges; 
+  
+In the soil model, 
+- communication between soil patches, so that for example water flowing out of one  
+soil patch flows into another (this would entail some sort of 3D spatial model so that  
+water would flow in the correct directions down hills);  
+- a reasonable pesticide model which includes all the effects pesticides and their  
+breakdown compounds have on the soil and water and biota; 
+- a better pH model (including its affects on soil biota; 
+- a soil biota submodel, including the significant effect of earthworms; 
+- more soil chemistry including the actions of other nutrients (potassium, calcium,  
+magnesium, etc) and a more detailed cation-exchange model;  
+- a better way of generating soil types based on simple easy-to-understand terms  
+such as the ribbon test (can you make a ribbon of soil in your hand, or is it too  
+crumbly) and typical soil test results  
+- a better way of choosing soil types based on geography, possibly with a simple  
+large-soil-class soils map of the US and world; 
+  
+In the plant model, 
+- a better plant growth and resource allocation model, especially in mobilization of  
+nutrients between different parts of the plant and the simulation of simple growth  
+regulation hormones; 
+- a better model for growth of individual plant parts, photoperiodism, and plant  
+drawing; 
+- more work on calibration of yield estimates to yield data in important garden and  
+crop plants; 
+- better plant parameterization, including a better way of estimating plant and soil  
+parameters based on large classes (monocot, dicot, etc); 
+- a weed seed bank model and weed competition with garden plants, and weed  
+parameters for the most common weeds; 
+ 
+In general, 
+- library research to make sure the equations in the simulation code agree with the  
+original research papers (e.g., following the EPIC explanations back to the original  
+cited papers and seeing what equations are given there, and what exceptions are  
+given that might make the equations not work as well in the situations in which  
+they are used, etc); 
+- better validation of all aspects of the model.  
+  
+======== Comments on Delphi
+
+Delphi 1.0 (under Windows 3.1) was used for most development. Therefore all the 
+form files (dfm) in this source code package are in Delphi 1.0 format (see the note 
+below about using form files under Delphi 2.0). Delphi 2.0 was used for compiling, 
+testing and debugging under Windows 95 and NT, but no major changes were made 
+there.
+
+Problems with Delphi 1.0
+
+* We fixed several bugs in the Delphi 1.0 VCL, and if you don't make the same 
+fixes you might have problems running our code. Most of our fixes were the same 
+ones as are recommended by the MemMonD (the patches are only available to 
+registered users of MemMonD). If you have strange or unexplained problems 
+running the code, especially ones to do with TMenuItems, check out discussion on 
+these VCL patches.
+
+* The biggest problem we had with Delphi 1.0 was with a bug that caused the 
+development environment to crash ungracefully when a floating point error was 
+encountered (a divide by zero, overflow, underflow, etc.). We tried to reduce the 
+effect of this problem by putting in extensive error-handling code. See the 
+description of udebug.pas and ueutils.pas for more on this problem.
+
+Problems with Delphi 2.0
+
+* Since we did most code development under Delphi 1.0, we kept the form files in 
+Delphi 1.0 format when we started working in Delphi 2.0. If you edit and save a 
+Delphi 1.0 form file in Delphi 2.0, you can never again read that file in Delphi 1.0. 
+So we have never edited the form files in Delphi 2.0. If you never use Delphi 1.0, 
+this should not be a problem, but it might be a problem in communicating with 
+others.
+
+* We were having a problem in Delphi 2.0 where any change to any file caused 
+linking errors if you choose "Compile" and not "Build all". We traced this to the use 
+of floating point constants. We reported the bug to Borland, and they said it had 
+been fixed in a patch, and we loaded the patch, but it was never fixed. The complete 
+workaround for this bug would be to remove all floating point constants from the 
+code (replacing them with initialized variables), but there are many in the code (the 
+uunits.pas file has many, for example). So we have just been rebuilding the whole 
+project each time we changed anything (it doesn't take that long).
+
+======== General comments on the source code 
+ 
+* All model code is based in part on EPIC3090 in FORTRAN by J.R. Williams et.  
+al., USDA ARS. 
+ 
+* Conditional defines that affect the code are:  
+- GS_DEBUG: Causes the numerical exceptions window to show a "break on  
+exception" check box. See the description of the numerical exceptions window for  
+details (udebug).  
+- ALLOW_HARDCODING: Causes hardcoding functions for some templates to be  
+called if the program is started up with no templates file (see udomain and  
+uhardcd). 
+- DEBUG_TURTLE: Causes the 3D turtle to draw x, y, and z axis lines when it  
+draws each line segment. See uturt3d.pas for details.  
+  
+* We left in a lot of comments that raise questions or suggest improvements; many  
+say "PDF fix" or "CFK fix" (the initials are for Paul Fernhout and Cynthia Kurtz). 
+ 
+* The reason the initials "Gs" are at the start of many objects is that the project used  
+to be called "Garden Simulator." 
+ 
+* The initials "Kf" at the start of some objects are for Kurtz-Fernhout Software. 
+ 
+* Often you will see the following code: 
+        var 
+        {$IFDEF WINDOWS} 
+        newString: string; 
+        {$ELSE} 
+        newString: ansistring; 
+        {$ENDIF} 
+This is because in 32-bit if you are going to pass a string to some Windows  
+functions, it must be an ansistring string. Failing to do this causes compile errors in  
+Delphi 2.0.  
+ 
+======== Hierarchy of domain objects by reference 
+ 
+domain (GsDomain in udomain)   
+..garden (GsGarden in uegarden)   
+....weather (GsWeather in ueweath)   
+....soil patches (GsSoilPatch in uesoil)   
+......plants (GsPlant in ueplant)   
+........drawing plant (one per plant)   
+..........drawing plant parts:   
+..........meristems (buds)   
+..........internodes (stem sections)   
+..........leaves   
+..........inflorescences   
+..........flower/fruits   
+....organic matter blobs (GsOrganicMatter in ueorgmat)   
+..aspect manager (GsAspectManager in uaspects)   
+....aspects (GsAspect in uaspects)   
+..group manager (GsGroupManager in ugroups)   
+....groups (GsGroup in ugroups)   
+......group items (GsGroupItem in ugroups)   
+..tool manager (GsToolManager in utools)   
+....tools (GsTool in utools)   
+......tool actions (GsToolAction in utools)   
+..template manager (GsTemplateManager in utempman)   
+....climates (GsWeather in ueweath)   
+....soilTypes (GsSoilPatch in uesoil)   
+....cultivars (GsPlant in ueplant)   
+....amendments (GsBag in uebag)   
+....harvest item templates (GsHarvestItemTemplate in uharvprt)   
+....icons (GsIcon in uicon)   
+....3D objects (KfObject3D in uturt3d)   
+..harvest manager (GsHarvestManager in uharvprt)   
+....harvest items (GsHarvestItem in harvprt)   
+....harvest reports (GsHarvestReport in uharvprt)   
+..tool parameter list manager (GsToolParamListManager in utools)   
+....tool parameters (GsToolRateOrAmountParam in utools)   
+..window manager (GsWindowManager in uwindman)   
+..hints manager (GsHintsManager in uhints)  
+ 
+======== Hierarchy of forms by what forms can be brought up from where 
+ 
+garden form(TGardenForm in ugsim) [non-modal]  
+..File menu  
+....exit form (TExitForm in uexit)  
+..Edit menu  
+....group editor form (TGroupEditorForm in ugrped)  
+......derivation options form (TAspectDerivationForm in uderopt)  
+......layer options form (TlayerOptionsForm in ulayers)  
+....harvest item editor form (THarvestItemTemplateEditorForm in uharved)  
+......icon chooser form (TIconChooserForm in uiconch)  
+....harvest report editor form (THarvestReportEditorForm in uhvrpted)  
+....templates form (TTemplatesForm in utempl)  
+......template mover form (TTemplateMoverForm in umovtemp)  
+......EPIC import form (TEpicImportForm in ugetepic)  
+......through text filer (ufilertx), duplicate object form (TDuplicateObjectForm in  
+uduplic)  
+....tool editor form (TToolEditorForm in utooledt)  
+......notes form (TNotesForm in unotes)  
+....tool parameter list editor form (TToolParamListEditorForm in utlpmed)  
+..Options menu  
+....backdrop chooser form (TBackdropChooserForm in ubackdrp)  
+....display options form (TDisplayOptionsForm in udisplay)  
+....simulation options form (TSimulationOptionsForm in usimop)  
+......templates form (TTemplatesForm in utempl, see above)  
+....reseeding options form (TReseedingOptionsForm in ureseed)  
+..Windows menu  
+....browser (TBrowserForm in ubrowser) [non-modal]  
+......notes form (TNotesForm in unotes)  
+......graph form (TGraphForm in ugraph, see below)  
+......group editor form (TGroupEditorForm in ugrped, see above)  
+......through browser components:  
+........harvest item component (KfHarvestItemTemplateBrowserComponent in  
+ubrowhar)  
+..........harvest item editor form (THarvestItemTemplateEditorForm in uharved, see  
+above)  
+........single real component (KfRealSliderBrowserComponent in ubrowrl)  
+..........derivation options form (TAspectDerivationForm in uderopt)  
+..........bounds change form (TBoundsChangeForm uboundch)  
+........array of reals component (KfRealSliderArrayBrowserComponent in ubrowrla)  
+..........derivation options form (TAspectDerivationForm in uderopt)  
+..........bounds change form (TBoundsChangeForm uboundch)  
+........3D object component (KfObject3DBrowserComponent in ubrowtdo)  
+..........3D object chooser form (TThreeDObjectChooserForm in utdoch)  
+............3D object editor form (TtdoEditorForm in utdoed)  
+....graph form (TGraphForm in ugraph) [non-modal]  
+......graph item options form (TPlotOptionsForm in uplotopt)  
+......layer options form (TlayerOptionsForm in ulayer)  
+......graph titles and scales form (TGraphTitleForm in utitlech)  
+......through logged var (GsLoggedVar in ulogvar),  
+........derivation options form (TAspectDerivationForm in uderopt)  
+....harvest form (THarvestForm in uharvest) [non-modal]  
+......harvest report editor form (THarvestReportEditorForm in uhvrpted)  
+....numerical exceptions form (TDebugForm in udebug) [non-modal]  
+....timeline form (TtimelineForm in utimelin)  
+..Help menu  
+....about box form (TAboutBoxForm in uabout)  
+from main form but not through menus:  
+..splash screen, during startup (TSplashForm in usplash)  
+..music form, hidden, plays music at startup (TMusicForm in umusic)  
+..patch area form, during creation of soil patch (TPatchArea in upatarea)  
+..wait form, during save at exit (TWaitForm in uwait)  
+ 
+======== Comments at head of each file (alphabetically) 
+ 
+== uabout.pas, dfm 
+About box form (modal). Displays a picture and a few text labels with an OK  
+button. 
+ 
+== uaspects.pas 
+Aspects are objects that hold information about simulation variables in order to  
+display them in the browser and graph window. Aspects are held by the aspect  
+manager through which they are accessed by the domain and windows. Aspects are  
+created at program startup by the domain. Code to create aspects is generated by the  
+supporting program "tab2asp.exe", which takes the information in the tab-delimited  
+file "aspects.tab" and creates six Pascal files: uasp_pla (plant), uasp_dpl (drawing  
+plant), uasp_s1,2,3 (soil patch - in 3 pieces because it was too big to compile),  
+uasp_wea (weather), and umconsts (constants and transfer functions). The tab2asp  
+program has its own project and source code (one form file). This system allows the  
+over 800 aspects to be modified in the tab file more easily (using a spreadsheet to  
+sort and resort the columns to compare) than editing the source code directly. To  
+add a new aspect, add it to the aspects.tab file, then run tab2asp, then make sure you  
+add a line to the asphints.tab file to fill in a hint for the aspect. If you change the ID  
+constant of an aspect, you must change the ID in the asphints.tab file also. Make  
+sure to always sort the aspects.tab file by the ID column ONLY when you are  
+finished with it. See the description of the aspects.tab file at the end of the  
+programmer's guide for explanations of columns in aspects.tab, which correspond to  
+fields of the GsAspect object. 
+ 
+== ubackdrp.pas, dfm 
+Backdrop chooser window. Displays current backdrop in picture, allows user to  
+choose new one or choose not to use one. Allows user to change background color  
+even if still using backdrop (because can turn off display of backdrop in options  
+menu). Deals with loading new bitmap into domain. 
+ 
+== ubitmap.pas 
+Mainly handles bitmap reading from files. GsBitmap is subclassed to make it  
+streamable with our system. 
+ 
+== uboundch.pas, dfm 
+Bounds change window for aspects in browser components. Fairly stupid form;  
+caller must initialize with pointers to aspect and groupItem, then accept or reject  
+changes to bounds based on whether OK was clicked. Note that changes to things in  
+the aspect and groupItem that can be changed in this dialog (only the unit) carry  
+back to the browser component. This means if I open the bounds change window  
+and the aspect is in meters, and I change the unit to feet in the window, it will be in  
+feet when I get back to the browser. Called by ubrowrl, ubrowrla, ubrowscv. 
+ 
+== ubrowcom.pas 
+Base class for browser components. Has pointers to aspect (info on representation of  
+variable data), object (plant, soil patch, etc), and groupItem (info on bounds, unit,  
+etc). Sets defaults for displaying. Methods for drawing and accessing data are used  
+by subclasses. In all browser components, the user can use the tab key to move  
+between interface items on the component. This is important because to save  
+resources we replaced normal window-handle sliders and other components with  
+no-resource sliders that have no handles and therefore can have no focus. So there is  
+an internal "unofficial" focus system used to know how to interpret keystrokes based  
+on the index number of the item selected. The browser components are therefore  
+(sort of) able to handle keyboard-only input. A lot of the other code in this file has  
+to do with resizing and determining the smallest/largest size the browser component  
+can take. Also notice that the invalidation system for ALL the browser components  
+is very bad; they just invalidate their whole selves when that is often not necessary.  
+But on a fast enough computer you can't tell anyway. The internal tab system must  
+include: a) overriding the maxSelectedItemIndex function if there is more than one  
+tab stop; and b) handling the enter keypress (override the dokeypress method) at  
+each tab stop (make it a tab stop only if something happens when you click on it). 
+ 
+== ubrowhar.pas 
+Browser component for harvest item template (uharvprt). Displays name of icon and  
+picture of icon. Clicking on name or icon brings up harvest item editor (uharved) to  
+change harvest item template. Harvest item templates are objects that hold  
+information (nutritional and otherwise) about things that can be harvested. NOTE  
+that this is a little confusing in the code the objects that contain information about  
+what can be harvested are called "harvest item TEMPLATES" and the objects that  
+contain information about particular fruits, leaves, etc are called "harvest items".  
+BUT in the help system we just call the harvest item templates (hits) "harvest items"  
+because the whole term is too difficult to grasp. In the help system we just call the  
+fruits, leaves, etc "harvested items". It seemed like a good idea at the time. 
+ 
+== ubrowint.pas 
+Browser component for integer. There are no integer arrays allowed, so far.  
+Displays slider with upper and lower bounds, and value beneath. Does NOT allow  
+user to change the unit. 
+ 
+== ubrowlis.pas 
+Browser component for list of enumerated items. Items are displayed as a list of  
+radio buttons. Strings for items are got from object in superclass, using  
+fillEnumStringList method of each object. This represents a case where you can't  
+just add an aspect to aspects.tab. If you add an aspect of this type, you must change  
+the fillEnumStringList for the object to add this list. 
+ 
+== ubrowrl.pas 
+Browser component for one real value (single). Displays one slider with bounds, a  
+value, and a unit. User can slide slider, click on value to change in dialog, or click  
+on unit. Clicking on bound brings up bound change dialog (uboundch). There are  
+two types of bounds: recommended and absolute. Recommended bounds are our  
+guesses for what we expect these things to be. Absolute bounds matter only for  
+editable aspects and they cannot be overridden. For read-only aspects, bounds are  
+always overridden if the values range outside the bounds. 
+ 
+== ubrowrla.pas 
+Browser component for multiple real numbers (singles). Actually, there is no reason  
+whatsoever for this component to be separate from ubrowrl, which shows only one  
+single value. It's just that we started out thinking it was necessary to separate them  
+for speed, and we never took the time to put them together. So every change to one  
+must usually result in a change to the other. It displays from 1 (though we never use  
+it for one) to 12 sliders (12 is for months), one set of bounds, one value (for the  
+selected slider), and one unit (for all sliders). The user can change any value (by  
+clicking on its slider or clicking on the value when it is selected). Can select a slider  
+by clicking on it or by tabbing to it. Note that you CANNOT just say how many  
+array elements you want; it works off the indexCount field in the aspect. 
+ 
+== ubrowscv.pas 
+Browser component for s curve. Displays little graph of curve, xy coordinates of two  
+points that define curve, units. Curve is calculated by giving parameters to s curve  
+function (ueutils) to generate smooth function. User can drag each of the two points  
+that define the curve or click on any of the four numbers to change it by itself. User  
+can click on bound to change for X direction only -- y axis is always from zero to  
+one. Because curve is being drawn during paint method and therefore s curve  
+function is being calculated during paint method, uses special s curve function that  
+returns whether or not an exception occurred during the function. If so, the paint  
+method stops without finishing the curve. 
+ 
+== ubrowser.pas, dfm 
+The browser is one of the few non-modal windows. It does a gazillion things. The  
+browser is divided into the left side (numbers side in the help system), which shows  
+the browser components, and the right side (pictures side) which shows any one of  
+several displays for weather, soil or plants. The browser file is a little messy and too  
+large. You should look at the help system on the browser thoroughly before reading  
+this file. 
+ 
+== ubrowtdo.pas 
+Browser component for 3D object (tdo). Displays name of tdo and drawing of it.  
+Under drawing are text characters user can click to turn left, right, enlarge and  
+reduce. User can drag tdo inside box to move around. Clicking on name opens tdo  
+chooser window. Clicking on picture of tdo does NOT open tdo chooser because  
+clicking is used (with drag) to move the tdo around in the drawing. 
+ 
+== ubrowtri.pas 
+Browser component for soil texture triangle. This used to be used on the left side of  
+the browser (numbers side), but now it is used on the right side. Because it is not a  
+"normal" browser component (BC), it has to have several weird things to make sure  
+it acts differently for being on the right side. There are a few other right-side BCs  
+like this. To be clean, there really should have been a right-side BC class instead  
+and they could have been subclassed from it (but they weren't planned, they just  
+grew). The system for tabbing is the same as for the left-side BCs, but this has a  
+pointer to a soil patch and NOT an aspect or groupItem. Because the aspects for the  
+soil texture triangle (sand, silt, clay) don't change, they are hard-coded here (note  
+this means you can't change them in the aspects.tab file without changing this file).  
+The values for divisions between soil-texture classes are hard-coded and taken from  
+Figure 3.1 on p. 39 in Troeh & Thompson, "Soils and Soil Fertility" (5th ed.) which  
+is based on USDA guidelines. User can click on layer number to change the layer  
+shown, or move the point around to change the percentages, or change each  
+percentage separately by clicking on it. The method for making sure the percentages  
+add up to 100 is not very good, and we had always wanted to have time to make all  
+the layers show at once somehow. 
+ 
+== ucommand.pas 
+Base class for all undoable commands, and command list that manages the  
+commands to create and maintain undoable/redoable commands in the menu. See  
+ugscom for all the undoable command subclasses. 
+ 
+== udate.pas 
+Functions for manipulating dates. Note that our date system starts counting at zero,  
+and the Delphi date system starts counting at one. (ours is left over from C++.) The  
+conversion functions take this into account, but watch out for it. 
+ 
+== udebug.pas, dfm 
+The numerical exceptions window. All calls to the global procedure debugPrint  
+cause this window to add a text line to its list box. If the "appear" check box is  
+checked, the window comes to the front. If the "log to file" check box is checked,  
+the line is added to a text file. The "break" check box only appears if the  
+GS_DEBUG conditional define is set (see ueutils). If the "stop simulation" check  
+box is checked, the simulation stops running at the end of the day. The messages  
+that appear are not that complex; they are mostly in calls to the errorMessage  
+function (ueutils) which just calls debugPrint. All the EQ and EP level functions in  
+the EPIC part of the code have error messages in their exception code, and they  
+usually pass on the primary error string as well. 
+ 
+== udefault.pas 
+This file contains functions that set defaults for weather, soil and plant parameters  
+and variables based on 1) the EPIC code, 2) the UTIL code, and 3) the EPIC help  
+files (.fmt) for all the parameters. It is called only by uhardcd, which initializes  
+some default templates (but only if the ALLOW_HARDCODING conditional define  
+is set), and ugetepic, which imports data from EPIC files. The defaulting here as  
+taken from the EPIC code may not be all correct, especially some of the more  
+involved soil calculations. This code was used when the current list of templates  
+was generated. See the help file explanation of differences between EPIC and GWI  
+for more information on our changes. 
+ 
+== uderopt.pas, dfm 
+Derivation options form. Aspects can be derived from simulation variables in a few  
+ways. 
+* kDeriveTypeUndefined is no derivation (just uses the simulation variable); 
+* kDeriveTypeDepth divides the liquid depth (mm) by the soil layer depth to get the  
+relative depth fraction of the soil layer (m/m); 
+* kDeriveTypeConcentration divides an amount in the soil (t/ha or kg/ha) by the  
+weight of the soil layer to get an amount per unit soil weight (g/t); 
+* kDeriveTypeArea divides an amount in the soil (t/ha or kg/ha) by the soil area to  
+get an absolute amount (t or kg); 
+* kDeriveTypeConcentrationFromPercent is just for the bag, and turns a percentage  
+concentration by weight into a concentration by weight (g/t) by simple conversion. 
+This dialog allows the user to choose between whatever derivation options are  
+available for any aspect. It is accessed from the group editor, browser or graph  
+window. (In the browser and graph window you ctrl- click on the unit.) The dialog  
+is pretty stupid and lets the caller fill it and get the results. 
+ 
+== udisplay.pas, dfm 
+Display options form. Allows user to change various options related to drawing in  
+garden window and browser. Simple dialog, no interactions, just filling at start  
+(from domain) and setting when OK is clicked. 
+ 
+== udomain.pas 
+Important file. The domain works somewhat like a document, keeping track of  
+everything in the garden file. At this point there can only be one domain at a time  
+(therefore the global var "domain"). Several menu options and other options set in  
+dialogs (such as the display dialog) are kept here as well as a pointer to the garden.  
+The domain handles saving and loading of the garden file, and the loading of all  
+ancillary files (palette, hints, aspect hints, templates, groups) at startup. It also does  
+aspect creation. The domain is used all over the program to access things in the  
+garden (e.g., domain.garden.weather) 
+ 
+== udpfruit.pas 
+Flower/fruit object. Connected to inflorescence. Stages are bud, open flower, unripe  
+fruit, ripe fruit, fallen flower (if flower drops), fallen fruit (if fruit drops). Flower  
+grows linearly, fruit grows by s curve. 
+ 
+== udpinflo.pas 
+Inflorescence object. Connected to phytomer at base, one or more flower/fruit  
+objects at end. Handles creation of flowers (according to timetable), draws itself and  
+places flowers (they draw themselves). Can be harvested whole with all  
+flowers/fruits. Uses recursion to draw either as tiny little plant (with or w/o  
+branches) or as head. The "head" shape doesn't have ray flowers and center flowers  
+but draws flowers in a circle, each having one long petal, so it looks like ray  
+flowers. Grows in size linearly with some influence from water stress only on the  
+day it is created. 
+ 
+== udpinter.pas 
+Internode object. Skeleton of plant. Plant starts with one internode with an apical  
+meristem and one (monocot) or two (dicot) axillary meristems. Meristems produce  
+new internodes. Each internode points forward to up to three forward plant parts  
+(meristems, internodes, or inflorescences) and backward to one plant part (usually  
+an internode). Leaves are separate pointers. Internodes grow in size both by biomass  
+accumulation and water uptake. The bottom internode draws the root top. A  
+"phytomer" is an internode and its associated leaves. At the correct time internodes  
+can also expand by bolting (defined by parameters). The internode used to be  
+combined with the leaves into a phytomer and it was recently separated, so some  
+things in this file refer to the phytomer instead of internode. 
+ 
+== udplant.pas 
+Drawing plant. Draws plant at any time, contains information on how to draw  
+plant, models partitioning of plant biomass into individual plant parts (meristems,  
+internodes, leaves, inflorescences, flowers, fruits). Drawing plant model has NO  
+feedback to rest of plant model and is for display only. This is because it is not very  
+accurate in terms of partitioning and size. The main idea here is give users an idea  
+of how the plant is doing visually so they can see how well it is growing and what  
+they need to do to keep it healthy. Also in this file is the traverser object, which  
+moves through the drawing plant structure calling specific functions of all the  
+drawing plant parts with several activities such as demanding photosynthate,  
+growing, drawing, etc. The traverser was created to get around stack size limits in  
+Delphi 1.0; otherwise it would not have been needed and these functions could have  
+been recursive. The access-> comments are for the tab2asp program to read when it  
+checks for correspondence between these variables and aspects. 
+ 
+== udpleaf.pas 
+Leaf object. Created by a meristem (when its internode is created). Has no pointers  
+to any plant parts (pointed to by internode). Fairly simple. Grows by s curve. Draws  
+using 3d object with scale based on biomass over optimal biomass. If is first leaf on  
+plant (cotyledon), draws using seedling leaf 3d object. Can draw compound leaves  
+(pinnate or palmate) using recursive method. Wilts based on plant water stress for  
+day. 
+ 
+== udpmeris.pas 
+Meristem (bud) object. Creates new internodes (with leaves) if in vegetative mode  
+or inflorescences (with flower/fruits) if in reproductive mode. Switches to repro  
+mode at start of flowering if random number is below repro. Probability. Can be  
+apical (at end of stem) or axillary (in leaf axil). If axillary, decides whether to  
+branch every day based on branching index of plant (branchiness) and branching  
+distance (distance from stem apex when axillary buds can branch). 
+ 
+== udppart.pas 
+Drawing plant part. Subclasses are: internode, leaf (including seedling leaf),  
+meristem (apical or axillary), inflorescence, and flower/fruit. A phytomer is one unit  
+of an internode and one or two leaves (whorled leaves are not simulated). The  
+superclass just has a few drawing and stream methods the other classes have in  
+common. Possibly some of the demand and growth methods could have been placed  
+here. 
+ 
+== udsoil.pas 
+Browser pictures side component for displaying soil color, texture, materials,  
+temperature, pH, N and P. Uses bitmap to double-buffer picture drawn. Descended  
+from browser component superclass (ubrowcom) but overrides many functions to  
+change behaviors. Has no aspect or groupItem, but has a soil patch. See ubrowtri for  
+more information on right-side browser components. 
+ 
+== uduplic.pas, dfm 
+Duplicate object form. Used when importing templates from a tab-delimited file.  
+Since objects in the file are identified only by their names, the user must resolve  
+problems with duplicate names. In the templates tab-delimited file are: 3d objects  
+(tdos), icons, harvest items, cultivars, climates, soil types, and bags. Any of these  
+things can duplicate an existing object of that type. The dialog asks the user  
+whether to overwrite the existing object, stop importing the new object, or rename  
+the new object. The form is absolutely stupid; it must be filled and checked by the  
+caller. It is called only by a method in the text filer (ufilertx) which is used by the  
+templates manager (utempl). 
+ 
+== udweath.pas 
+Browser pictures side component for displaying weather values for the past month.  
+The weather object holds on to an array of 30 structures that hold daily weather for  
+this display. See ubrowtri for more information on right-side browser components. 
+ 
+== uebag.pas 
+Bag model object. Not very complicated; just holds materials. Functions in soil  
+patch operations file (uesoilop) handle using the bag. This file mainly just has  
+methods for data transfer and streaming. 
+ 
+== ueg.pas 
+Our additions to the EPIC model. The division makes little sense at this point since  
+we have made major changes all over the model code. These are mainly functions  
+that we made entirely from scratch. These functions deal mainly with plant biomass  
+allocation and plant reproduction. 
+   
+== uegarden.pas 
+Garden object. The garden object has very little to do as most of the parameters  
+have been moved into the soil patch. In EPIC, the garden and soil patch are the  
+same thing since the simulation models only one field. In GWI, the garden is a  
+container for any number of soil patches. At this point, the garden is just a  
+container. With improvement the garden could manage communication between  
+soil patches and model the surrounding areas to more completely simulate water  
+flow between areas. Simulation options are stored here -- both whether each option  
+is to be overridden from individual choices, and what the overridden option is set to.  
+The garden also handles a few garden-wide tasks such as drawing and reseeding all  
+plants. 
+ 
+== ueorgmat.pas 
+Organic matter blob object. Holding place for dead plant biomass before it decays  
+into soil patch. Whole reason for this object's existence is so user can drag organic  
+matter around and see it as a useful and important resource. Each soil patch keeps a  
+list of OM blobs and clears the list out on each day of simulation. Important to  
+understand that the OM blob biomass is added to the soil patch as well as the OM  
+blob when the OM blob is created, so nothing has to be added when the OM blob  
+"decays". This double-accounting is done so that the user can see the amount of OM  
+on the patch increase as they drag OM blobs to it and harvest plants (otherwise it  
+looks like OM is missing). 
+ 
+== uep.pas 
+Second-level EPIC functions (EP = EPIC Procedures). These are most of the  
+functions called by the next day functions in the soil, plants and weather. These  
+functions in turn call the EQ (EPIC equations) functions (ueq, and ueqh for  
+hydrology functions). Some of this code is directly as translated from EPIC; some  
+has been modified by us. The most major modification in this file is the change of N  
+and P and water allocation to model competing plants in a soil patch. Otherwise  
+there are many small changes, some of which are marked. Some of the pesticide  
+transport code remains (commented out) from when we had it working. We also  
+made some changes in the methods used for splitting soil layers. And we changed  
+porosity so it maintains a closer relationship to bulk density instead of following  
+along with field capacity and wilting point. 
+ 
+== ueq.pas 
+Bottom-level EPIC functions (EQ = EPIC equations). Hydrology-related bottom- 
+level EPIC functions are found in ueqh. Into this code we have typed the entire text  
+of a document by JR Williams which he gave us in 1994. We call this document  
+"the chapter" here. The equation numbers here correspond to that chapter and are  
+referred to in the text. Some low-level functions that were not mentioned in the  
+chapter are included without equation numbers. Under the text preceding each  
+function is a comparison of the function as denoted in the chapter and the function  
+as we found it in the EPIC FORTRAN code. Just before each function is a short list  
+of important variables in each function. We have not tried especially hard to keep  
+these lists of variables up to date, so some might be wrong. Some extremely  
+complex functions we split into two. Please note that we started translating with  
+EPIC3090, which was put out in 1993, so there may be significant differences  
+between our translation and the current EPIC code. There may also be significant  
+errors in translation we have not yet found. Many of our changes to the EPIC code  
+are noted here, but some are not. The asterisks everywhere make it slightly easier to  
+find specific topics in this large file (for example, searching for "*CROP" will find  
+the crop growth section). Note: we have left a lot of pesticide-related code here  
+(commented out) for review. We chose not to use EPIC's pesticide-movement code  
+because we did not want to present such a simplistic pesticide model in a teaching  
+simulation. An effective pesticide movement model would include the effect of  
+pesticides on soil fauna, organic matter and nutrients and would model the  
+breakdown of pesticides into secondary compounds, which might themselves have  
+significant impacts on the soil and groundwater. 
+ 
+== ueqh.pas 
+Bottom-level EPIC functions (EQ = EPIC equations) having to do with hydrology.  
+Actually this file was only removed from the ueq file because Delphi 1.0 choked on  
+the large file. See the comment at the start of the ueq file for more information on  
+the bottom-level EPIC functions. 
+ 
+== uesoil.pas 
+Soil patch object. Information in the soil patch is in several record structures as  
+specified in uestruct. Most of the soil patch information is in the layers structure  
+which has all of the information that is by layer. Most functions are called in the  
+next day function (a few in the end year function). Actions by tools on the soil patch  
+were moved to uesoilop, and the soil patch is passed in (because this file was too  
+long). The soil patch has a TListCollection of plants and a pointer back to the  
+garden. Read uestruct to understand the structures here before reading this code. 
+ 
+== uesoilop.pas 
+Tool actions on the soil patch object. These were moved out of uesoil (because the  
+file was too big for Delphi 1.0), and the soil patch is now passed in. "mixSoil" is the  
+only function here that is largely unchanged from the EPIC. The liming function is  
+pretty shaky because it was derived from autoliming. (But then the entire pH model  
+is extremely simple and should not be relied upon.) The sulfur application function  
+is ridiculously shaky. The bag function is theoretically okay but could use more  
+work. The simpler functions (add/remove soil, add/remove mulch, aerate) are  
+probably fine since they don't do that much. Read uestruct to understand the  
+structures used here before reading this code. 
+ 
+== uestruct.pas 
+Many structures used by model objects. Structures are in this file instead of each  
+separate file so uep and ueq can just include this file and not the object files (avoids  
+circularity). Important: to add a variable to an object, add it to the end of any  
+structure that has a buffer at the end (usually called reservedArray), and reduce the  
+size of the buffer by the proper amount (single=4 bytes,smallint=2 bytes, etc, see the  
+Delphi documentation to be sure). After a new var is added here you must initialize  
+it on reading from files in two ways. 
+1) For binary files, increment the version number of the object (in its  
+classAndVersionInformation function), then respond when the file is streamed in by  
+setting the value to an initial default. Files streamed out with the new version  
+number will save the information. (See the streamDataWithFiler methods in the  
+model object files for some examples of this versioning technique.) You can also  
+add a var to an object at the top level (not in a structure), but then you have to pass  
+it more explicitly to any functions that need it (not just inside the structure). Adding  
+a new var to a structure works best when you don't need an aspect or to save it in the  
+template (like something you just need when the simulation is running). 
+2) For tabbed-text importing (from tabbed-text template files or from EPIC files),  
+the problem is harder: you cannot add a new variable to the tabbed-text data files  
+unless you create a new version number in the tabbed-text files and deal with it in  
+your code (see utempman and ufilertx). But if you create a new tabbed-text version  
+number, your files will be unreadable by anyone else unless they have your code.  
+Probably it is best to just default the new value on reading the object from a tabbed- 
+text data file (see udefault), and that info can't be saved in tabbed-text format until  
+there is a new global tabbed-text version. 
+Note that there are some "unused" vars in some structures that are no longer used  
+but were left in place to keep the binary files intact; these can be used but again  
+cannot be put into the tabbed-text files. 
+We are using only singles for float vars and only smallints for integer vars. 
+Comments with -> arrows are for use by the tab2asp program to compare against  
+existing aspects to see if any were left out (an NA on a line means the checking  
+program will ignore the var). See the description of the tab2asp program at the end  
+of the programmer's guide for more information on aspect delineation comments. 
+ 
+== ueplant.pas 
+Plant object. Information in the plant is in several record structures as specified in  
+uestruct. Always make sure to recalculate biomass relationships when changing any  
+of the biomass components. And tell the drawing plant when doing this by setting a  
+var for the daily change in X, then changing the drawing plant code to look at the  
+change in X when it does its next day routine. Read uestruct to understand the  
+structures here before reading this code. 
+ 
+== ueutils.pas 
+Assorted math and other functions used by the model objects. The soil layer  
+manipulation functions are here because they didn't fit in the soil file under Delphi  
+1.0. 
+NOTE: The words RE-RAISES EXCEPTION mean that any function that calls the  
+function SHOULD have a try/except handler somewhere around the function call,  
+because the function re-throws the exception. This is for reporting, so we know in  
+which function the function was called when it went wrong. This whole exception  
+handling scheme was to deal with a bug in Delphi 1.0 in which floating point  
+exceptions (overflow, underflow, divide by zero, etc) cause the development  
+environment to crash. If you are using the source code under Delphi 1.0 be aware of  
+this bug. If you have the compiler directive "GS_DEBUG" on, the numerical  
+exceptions window (udebug) will show an extra "break on exception" check box. If  
+you check this box, the program will stop execution with a "debugBreak" call. The  
+"debugBreak" call doesn't work very well and Delphi doesn't know where the  
+execution point is, but if you press F7 or F8 at this point the system (usually) comes  
+to the correct line without crashing. Note that we're not sure the "debugBreak" call  
+works under Delphi 2.0. 
+ 
+== uweath.pas 
+Weather object. Information in the weather is in several record structures as  
+specified in uestruct. Monthly parameters are used to create daily means, and daily  
+values are generated based on the daily means. The weather also keeps 30 days of  
+recent weather vars for displaying in the browser pictures side. Read uestruct to  
+understand the structures here before reading this code. 
+ 
+== uexit.pas, dfm 
+Exit form. Appears when user leaves the program. Suggests files the user might  
+want to save (from garden, groups, templates, tools files). User can check boxes for  
+which files to save. Choices are to save checked files and exit, don't save any files  
+and exit, or go back to the program. No code here; initialized and run by the garden  
+window (ugsim). Notice this is not created when needed, in case of a memory  
+problem. 
+ 
+== uexcept.pas 
+Exception-handling code for pointers, wrapping around Delphi exception-handling  
+system. 
+ 
+== ufiler.pas 
+Filer object for document streaming system (binary). Also defined here is  
+gsStreamableObject, which is the base class for all objects which can be streamed  
+with this filer. Filer has methods to stream all major types of data. Records (such as  
+those used in uestruct) are streamed simply using streamBytes. All classes to be  
+streamed must be registered in uclasses. On streaming out, the filer writes out each  
+object's class ID, version number and size. On streaming in, the filer checks each  
+object's class ID, version number and size against the current ones. If there is a  
+discrepancy it raises an exception and aborts the streaming in. 
+ 
+== ufilertx.pas 
+A filer for tab-delimited text files. Used only for text versions of templates. Some  
+assumptions about tab- delimited text files: 
+1) each object takes up one line; 
+2) each object has a version number and type; 
+3) the number of columns is constant as is the order (if the number of columns is  
+wrong it will choke); 
+4) objects are identified by their names and therefore cannot have duplicate names  
+(if they do, the duplicate options dialog appears - uduplic). 
+Another complication is that Excel (and possibly other spreadsheets) puts double  
+quotes around any cell in a tab-delimited file that contains a comma (,) to make sure  
+the comma isn't misunderstood as a secondary delimiter. This means if we write out  
+a file with some cells containing commas, edit the file in Excel, save it from Excel  
+as a tab-delimited file, then read the file again, the cells containing commas will  
+"magically" have double quotes as their first and last characters. To get around this  
+problem, for text data stored in Delphi as a string variable, the text filer strips off  
+double quotes in the first and last positions (only) when they occur. For text data  
+stored in Delphi as a PChar (notes) the text filer strips out ANY double quotes that  
+are not preceded by a slash. 
+ 
+== ugetepic.pas, dfm 
+Epic import form. This form is kind of secret, because you can only access it by  
+opening the templates window then pressing Ctrl-Shift-E, at which point a button  
+appears. This is so the general user doesn't mess with it as it is not clean. It was  
+created mainly to aid us in using the EPIC weather and soil files and is not as user- 
+friendly as the rest of the program. For example, it does not recover well when there  
+is anything (at all) wrong during file input. The help system has a description of the  
+window in the EPIC section, under Auto Operations. We have left the form around  
+in the program for any soil scientists who have special EPIC files they want to  
+import. It does import plant data, but we have added so many parameters to the  
+plants that it's not advisable. It does not know how to read the soils5 data files at  
+this point. We have tried to put in defaults for all non-EPIC parameters, but some  
+may have slipped by as it was not a priority. 
+ 
+== ugrafcom.pas 
+Graphing component, a subclass of TImage. Handles graphing with data from  
+logged vars (ulogvar) in graph window (ugraph). Also a graph scale object which  
+keeps data on graph scales and recalculates scales as needed. The graph has two  
+scale objects, left and right; vars are graphed on one of the scales. Graph can draw  
+in either normal time-series mode (where each Y point is graphed against X of the  
+simulation date) or xy mode (where each Y point is from one var and each X point  
+is from another var). Graph uses a TBitmap to double-buffer itself. Whole system  
+works with data points for each var associated with simulation dates. 
+ 
+== ugraph.pas, dfm 
+Graph form. Simulation aspects are graphed using the browser, placed under the  
+graph in a legend, drawn on the graph. The list box below the graph has logged var  
+objects (ulogvar) that contain the information for each graphed aspect. The graph is  
+drawing using a special TImage descendant (ugrafcom) that deals with the graphing  
+and the special date-related data. User can click on different columns of the list box  
+(owner-draw) to change different things about the graphed aspects. Each data point  
+has a date, and the user can select what dates to look at. 
+ 
+== ugroups.pas 
+The group manager manages groups. Each group has some number of group items.  
+A group item has the text ID of an aspect and some display information for it (unit,  
+bounds, derivation, layer options). There are several class functions at the end of the  
+file that are used for accessing and displaying information in common to all group  
+items. Since the groups can be input and output in tab-delimited form, the options  
+stored here can be changed by the user (as opposed to the aspects, which can only be  
+changed in the source code). 
+ 
+== ugrped.pas, dfm 
+Group editor form. Used to edit groups in the groups file and to change some  
+characteristics of each group item. Groups are defined in ugroups and controlled by  
+the group manager (which the domain has). List boxes of group items ("choices")  
+and aspects ("variables") have pointers to the correct group items or aspects. A  
+NEW group manager is made inside the form, and if the user clicks OK the new  
+group manager is made current and the old one is freed. If the user clicks Cancel  
+the new group manager is freed and nothing is done to the current group manager.  
+The user can also save or load a group file from here, or import/export a tabbed text  
+groups file. Note that the tab import/export here works differently than in the  
+templates window. In fact, this way of doing tabbed text i/o is the norm, and the  
+templates way (with ufilertx) is the exception. 
+ 
+== ugscom.pas 
+All the commands that can be undone. See ucommand for the base class of undoable  
+commands and the command list manager. Each mouse down/move/up in the  
+garden window can potentially create a command. Depending on the tool action (as  
+defined in utools), a command is created and put into the command list, where it  
+can be done, undone, and redone. In some of these subclasses redo is the same as  
+do; if so, redoCommand is not overridden and it calls doCommand. Each command  
+must override at least trackMouse, doCommand, undoCommand, and description.  
+There are two subclasses that have several related subclasses hanging off them:  
+GsSoilOperationCommand (in which one soil patch is modified, and a copy is kept  
+of the original), and GsTwoSoilPatchOperationCommand (in which two soil  
+patches are modified at once, and copies are kept of both originals). For many soil  
+operations it is not really necessary to copy the whole soil patch, but that is the  
+simplest and safest way though it might be slower and more expensive in memory  
+terms. Several of the plant changing methods also keep a copy of a plant. A few of  
+these commands are not created from the garden window but from other windows  
+(such as ResetHarvestListCommand), and some can be done both from the garden  
+window and from the other windows (ReseedPlantCommand can be done from the  
+browser). They act in the same way as the mouse- created commands in the  
+command list. 
+ 
+== ugsform.pas 
+GWI form superclass. This class exists solely to allow extra hint handling in uhints  
+and ugsim for the long and aspect hints, which are read in from tab-delimited files  
+at the start of program operation. Most of the forms in the project are descended  
+from this class (only a few small forms aren't). See uhints for a list of what types of  
+interface elements have hints in our long hint system. 
+ 
+== ugsim.pas, dfm 
+The main form for the application. It is called ugsim because the old name was  
+"Garden Simulator". This form file is long and does MANY things. Handles tool  
+actions (with mouse down, move, up); opens and saves files; opens other windows  
+from menu; changes menu options; manages transfer of model data; draws garden  
+and manages bitmaps to layer picture (bitmaps are in domain). You should look  
+over the domain file (udomain) before reading this as you need to understand some  
+of the things in the domain. 
+ 
+== uhardcd.pas 
+Sets up some default templates. Only called if the program is started up with no  
+templates file AND the ALLOW_HARDCODING conditional define is set during  
+compiling. 
+ 
+== uharved.pas, dfm 
+Harvest item template (HIT) editor. There is a naming discrepancy here; in the help  
+system, HITs are called simply "harvest items" because it is shorter. But in the code  
+harvest items are not HITs, they are objects that represent real fruits or leaves or  
+plants that were harvested. The HITs just contain information about what is in a  
+"typical" harvested item for a cultivar. For example, there might be a HIT called  
+"Tomato fruit", and a particular harvested item might be of the TYPE "Tomato  
+fruit", but it was harvested from a particular tomato on a particular date. The HIT  
+editor presents a list box of HITs and allows the user to change the nutritional  
+information in a columned list box, the icon by clicking on the icon (or on "Set  
+icon"), and the note by typing in a memo. The group editor supports canceling the  
+edit by making a copy of the whole group manager and replacing it when the user  
+clicks OK, but here there is no HIT manager; the HIT list is in the template  
+manager along with a lot of other things. So the HIT editor makes a copy of the list  
+of HITs, then compares the two lists after the OK button is pressed. The HIT editor  
+can be called from the browser (from a HIT browser component - ubrowhar) or from  
+the main menu. 
+ 
+== uharvest.pas, dfm 
+Harvest form. This form is fairly simple. All it has to do is draw the list of harvested  
+items, with or without pictures. It uses a TImage to draw the report instead of a list  
+box, because we wanted to handle wrapping the icons around ourselves and we don't  
+know the height of each line until it is drawn. An owner-draw variable-height list  
+box would also allow this, but we tried it and it was flickery and had size/resource  
+limits. 
+ 
+== uharvpnl.pas 
+Harvest item panel. Used both in the garden window (at the bottom) and in the  
+browser right side (under the plant drawing). Note that items harvested from one  
+plant show up in both the browser and the garden window. This is a fairly simple  
+panel descendant that draws a quantity of icons in one row with up and down  
+buttons to show the other rows. The blue bar on the right side of the panel shows  
+how many rows of icons there are and acts like a little "progress bar". The two  
+buttons are created at run-time as this component is not available at design time.  
+The panel can have its own harvest list; at this point the garden window lets its  
+harvest panel use the domain harvest list (since it needs the whole thing), and the  
+browser fills a harvest list in the harvest panel with only the items for the plant in  
+question. When another plant is selected the harvest list is cleared and a new one is  
+made. 
+ 
+== uharvprt.pas 
+Defines several objects. 
+* The harvest item template (HIT) contains information about types of things that  
+can be harvested, including nutritional information about a typical item of that type  
+(calories, energy, vitamins, minerals), and which icon is used to show the item in  
+the garden window and harvest panels. 
+* The harvest item models a specific fruit, leaf or other object that was harvested  
+from a particular plant. It keeps track of which plant it was harvested from, which  
+cultivar the plant belonged to, which soil patch it was in, what date it was  
+harvested, and what kind of item it is (which leads to a HIT). 
+* The harvest report specifies what information to show about harvested items in  
+the harvest window, and how to sort that information. See the constant lists below  
+for what the "show" and "sort by" possibilities are. 
+* The harvest item sorting group is an object used when sorting and totaling the  
+harvest item nutritional information. For example, if the harvest report says (in  
+effect) "show calories per week", the harvest manager sorts the harvested items by  
+week, and the harvest item sorting group keeps the total amount of calories in each  
+week so it can display that total in the harvest window. 
+* The harvest manager handles all the harvest information. It resides in the domain,  
+and the harvest window (uharvest), HIT editor (uharved), and harvest report editor  
+(uhvrpted) access and change it. 
+ 
+== uhints.pas 
+The hint manager. Makes the long hints and aspect hints show instead of normal  
+short hints. Hints come from two files that are read in at startup, usually hints.tab  
+and asphints.tab (though the names can be changed in the ini file). Almost all of the  
+forms in the project descend from gsform (in ugsform) which has a constructor that  
+sets all the showHint properties of its objects to true. This is done by subclassing  
+instead of setting all the showHint properties by hand because a) it was quicker, and  
+b) it can be changed back easily simply by commenting out the line that sets all the  
+showHints to true. In the main form file (ugsim) the hint catching function calls the  
+functions here to display the proper hint for the focused control or aspect. The hint  
+manager also reads the button hints from the file and sets them up into a list of  
+gshint objects. Identification of components is by form name and component name  
+so two forms can have buttons with identical names (like helpButton). Aspect hints  
+are loaded by the aspect manager (uaspects) called by the domain at startup. 
+ 
+== uhvrpted.pas, dfm 
+Harvest report editor form. Edits harvest reports (read uharvprt first before reading  
+this). Fairly simple; two arrays ("show" and "sort by") are edited by moving items  
+into and out of them from the list of available options. User can also make new  
+reports, copy, delete, export, import, etc. Because there is no discrete harvest report  
+manager to make a copy of for canceling, the form copies to a list of harvest reports  
+(in the list box) and checks the list against the original list (in the harvest manager)  
+when OK is clicked. This is the same scheme as in the harvest item template editor.  
+There are some fancy things here to deal with the fact that the information is kept in  
+arrays (show and sort by) and not in objects. 
+ 
+== uicon.pas 
+Just an icon that is subclassed to be streamable with our system (see ufiler). It also  
+knows its name. Not very complicated. 
+ 
+== uiconch.pas, dfm 
+Icon chooser form. Used to set the icon for a harvest item template (HIT). Called  
+only from the HIT editor. Like the HIT editor and the harvest report editor, makes a  
+copy of the list of icons (in the template manager) at startup and checks the copy  
+against the original list when OK is pressed. This allows the user to cancel all  
+changes in the form. Otherwise fairly simple; user can pick a different icon, or  
+import or export to an icon file (.ico). There is no icon editor. 
+ 
+== ulayers.pas, dfm 
+Layer options form. Lets user choose options for displaying an aspect having to do  
+with soil layers. Note this is for soil layer aspects only, not for aspects having to do  
+with other arrays such as weather months. This is called by the group editor and by  
+the graph editor. Choices are to show data from only one layer, to select data from  
+any number of layers, or to show summary information for all or some layers (min,  
+max, mean, sum). This form is mainly stupid, but has a few checks. 
+ 
+== ulogvar.pas 
+A logged variable, or an object to hold information about a simulation aspect for  
+graphing. The "loggedVar" as we call it has its data in a long array of singles in  
+memory, which is expanded and contracted as needed. A loggedVar can only hold  
+singles (not integers). The loggedVar keeps track of many things about how to  
+display itself, including which axis it is on (left or right - see ugrafcom), if it is an  
+array and if so how to display it, its model in the domain (to get the data), its aspect  
+(to get the name, hint, etc), information taken from a group item for it (doesn't have  
+a group item pointer because of possible changes by the group editor), information  
+on how to draw the line on the graph (which is edited in the graph window), and  
+the start and end dates of its data. Since data is linked to simulation dates, the data  
+is looked up that way. 
+ 
+== umconsts.pas 
+Aspect creation constants and transferField functions. Created by tab2asp program. 
+ 
+== umodel.pas 
+GsModel is the base class for model objects. Based on streamable object (in ufiler).  
+Encapsulates some transfer functions for browser/grapher access to models and for  
+streaming and creating. The graphical model subclass adds some basic drawing  
+code (keeping a bounds rectangle, checking if a point is in it), a name, and a note.  
+All the model objects (garden, weather, plant, soil, amendment, OM blob) are  
+descended from the graphical model. 
+ 
+== umovtemp.pas, dfm 
+Template mover form. Used to copy templates from one template file to another.  
+Called from the templates window (utempl). Standard mover-type dialog. Current  
+templates library opens by default on left side; on right side user opens another  
+template file. But user can open another file on the left side also. Also here you can  
+import tab-delimited templates singly from a template file by opening the file on the  
+right using Import and choosing templates to copy over. (much easier than using the  
+whole-file import in the templates window.) A little messiness with keeping track of  
+the two list boxes with accompanying objects (templates) and the file names. Some  
+redundancy between the two sides. Had meant to make group, tool, etc movers like  
+this one but never got around to it. 
+ 
+== umusic.pas, dfm 
+This form does nothing but play the startup music. Don't even remember why we  
+thought it was necessary to have a separate form. Something to do with starting the  
+music right away, or making the music play better during startup... 
+ 
+== unotes.pas, dfm 
+Notes editor. Each graphical model (see umodel) descendant has a note which is a  
+PChar. This includes garden, weather, soil, plant, amendment, and OM blob  
+objects. Also tools have notes (same type). The notes editor can be opened from the  
+browser or from the tool editor. If opened from the browser, it shows the notes for  
+all objects in the garden and templates in the current templates file. If opened from  
+the tool editor, it shows the notes for all tools in the current tools file. The form has  
+no cancel ability mainly because we just didn't have time and the notes aren't  
+especially important. If tool notes are being edited, the Rename button is hidden  
+because there is already a rename button in the tool editor. Either set of notes can be  
+exported to a tab-delimited file for use in other programs, but they cannot be  
+imported (again for lack of time and importance). 
+ 
+== upatarea.pas, dfm 
+Soil patch area form. Also contains some other stuff about the soil patch. We need  
+this information right away when the soil patch is created, so it pops up right when  
+the user is done sizing the soil patch after creation. The form can also appear if the  
+user selects the tool action "change soil patch" (usually in the shovel). If the soil  
+patch has just been created, the area and soil type are editable; if the soil patch was  
+created previously (and "change soil patch" is being done) the area and soil type are  
+not editable. Actually it would not be that big a deal to change the soil patch area  
+now, because we divorced it from the watershed area (it used to be the same thing).  
+But we have not looked into changing it. Because this form is needed often and we  
+don't want it to fail, it is created automatically at startup like the non-modal  
+windows (garden, browser, graph, harvest). The other modal windows that have this  
+distinction are the wait form (for progress messages), the about box form, the  
+numerical exceptions form (udebug), and the exit form. 
+ 
+== uplotopt.pas, dfm 
+Plot options form. This form appears in two circumstances: 1) the user graphed an  
+aspect from the browser and the domain option to show the options window at the  
+time of graphing was turned on; and 2) the user clicked on one of several columns  
+in the graph list box on the graph window. The window shows several options that  
+can be changed for a loggedVar (see ulogvar for details). The window works by  
+making a copy of the loggedVar and updating the original if OK is pressed. The  
+aspect pointer is used only for reference and nothing there is changed. 
+ 
+== uprofile.pas 
+Code for reading an ini file. Used only by domain. We used to use this for more  
+complex things at a time when we had data files stored in profile format, but now  
+most of this code is unused. 
+ 
+== urandom.pas 
+An object that generates random numbers. All the model objects have one (weather,  
+soil, plant, drawing plant), but only the drawing plant uses the one it has (actually it  
+has two). Meant to use these in calculations but did not get around to it. Most of the  
+model code instead uses the random functions in ueutils (mainly  
+Utils_RandomZeroToOne). So this code is used right now only by the drawing  
+plant, though the objects are created and maintained by several classes. The idea is  
+to move into a situation where each model object has its own generator that operates  
+independently of others, which is more reliable. The generation algorithm for  
+zeroToOne is almost identical to the function in ueutils. 
+ 
+== ureseed.pas, dfm 
+Reseeding options form. User can choose when to reseed all the plants in the garden  
+(choose from radio buttons), or reseed now (click check box). Sets things directly in  
+domain if OK pressed, but the calling form (ugsim) does updating and immediate  
+reseeding based on the result of the form. 
+ 
+== usimop.pas, dfm 
+Simulation options form. Many options, but most are fairly simple 3-state check  
+boxes. Loading and saving are directly from garden (domain.garden) using simple  
+transfer functions for all elements. There are some interactions between some  
+options; for example, if runoff is turned off, water erosion from runoff is  
+automatically disabled. And the user can get to the templates window from here to  
+add another climate or soil type from another template file, and this form must  
+update its list correctly. Otherwise the window is straightforward though large. 
+ 
+== usliders.pas 
+Slider component for displaying/editing numerical info in the numbers side of the  
+browser. Fairly simple drawing. Has no windows handle, but keeps track of an  
+unofficial focus for keyboard control. Used in some browser components (ubrowint,  
+ubrowrl, ubrowrla, ubrowcol) and also in the soil patch area window (upatarea). 
+ 
+== usound.pas 
+Sound object for tool sounds. Uses Delphi function sndPlaySound (in the  
+MMSYSTEM system included in WinTypes). Sounds are played when tool actions  
+are done in garden window (and "play tool sounds" option is on), and sounds are  
+played, imported and exported in the tool editor. Because the sounds are streamed  
+with the tools, this is a streamable object. 
+ 
+== usplant.pas 
+Plant statistics drawing component. Used on browser right (pictures) side. This is  
+used to draw the plant biomasses (called "statistics" here) and the plant growth  
+stresses. Uses a bitmap to double-buffer. Keeps pointer to plant; otherwise is like  
+other right-side descendants of browser components (see ubrowtri for explanation of  
+these descendants). Plant statistics are gathered by the drawing plant using the  
+function getDrawingPlantStatistics which fills the statistics record with information  
+by traversing the drawing plant (in a statistics-gathering traversal mode). Plant  
+stress information is gotten directly from the model plant. Note that in the browser  
+the plant display options are "drawing", "biomass" or "stresses". This panel is  
+visible when either "biomass" or "stresses" is selected, and hidden when "drawing"  
+is selected. 
+ 
+== usplash.pas, dfm 
+Splash screen form. Does nothing but appear. While domain is loading, it calls  
+loadNextAnimationPicture as each stage in loading files is completed, and the  
+splash screen changes the animation picture. The pictures come from nine TImages  
+that are hidden from view. 
+ 
+== usstream.pas 
+String stream. Used by text filer (ufilertx) to parse strings, usually those associated  
+with points or arrays (because there are delimiters inside the string in these cases).  
+Also used by 3d object (in uturt3d) to read strings from tdo file. 
+ 
+== usupport.pas 
+Many commonly used functions, mostly dealing with text manipulation. Functions  
+for opening and saving any kinds of files are also here. The file save function makes  
+a temporary file and a backup file and tries to handle problems. Also this is where  
+global vars are for whether ancillary files opened by the program might have been  
+changed during a session (templates, tools, groups, ini file). 
+ 
+== utdoch.pas, dfm 
+3D object (tdo) chooser form. Opened from browser component for 3D object  
+(ubrowtdo). Fairly simple, just has owner-draw list box with drawings of tdos, and  
+set of buttons for import/export, edit, etc. User can choose a tdo from the list for the  
+model aspect (a drawing plant part tdo). Like harvest item template editor and  
+harvest report editor, makes copy of list of tdos (from template manager), then when  
+user clicks OK compares the copy to the original. 
+ 
+== utdoed.pas, dfm 
+3D object (tdo) editor. This window was made at the last minute and is not very  
+easy to use. It just acts as an interpreter for the tdo specification. Probably making a  
+new tdo would be very difficult in this window (the original tdos were made in a  
+separate tdo editor written in Visual Basic some time ago). Eventually one would  
+want to add the ability to move the points in the tdo by clicking on them and  
+dragging them, and to make new points graphically. The way it is now, it is no  
+different from exporting a tdo to a file, editing the file in a text editor, then  
+importing the file again. 
+ 
+== utempl.pas, dfm 
+Templates form. See template manager (utempman) for description of templates.  
+When any garden file is open, the program needs an open templates file to use to  
+make new garden objects. This window shows the templates in the open templates  
+file (in a list box) and allows the user to change the templates file, import templates  
+into it from another file, import/export tab-delimited templates files, save changes  
+to the current templates file, and do various things with individual templates in the  
+list. The form makes a copy of the current template manager (in the domain) at  
+creation and replaces the original with the copy if the user clicks OK. If the user  
+clicks Cancel, the copy is removed. Sometimes under the 16-bit app, making a copy  
+of the whole template manager makes the program run out of resources; if this  
+happens the window shows with no templates and the user has to go out and close  
+something and try again (but this doesn't happen often and possibly not at all under  
+32-bit). It would be better if the templates window didn't make a copy of the whole  
+template manager because if you have a large templates file it could be too memory-  
+consuming (never mind resources). This is the same problem as with the tools  
+editor. 
+ 
+== utempman.pas 
+Template manager. Templates are objects used to create garden objects by making  
+copies of them. Climate templates are used to make weather objects; soil type  
+templates are used to make soil patches; cultivar templates are used to make plants.  
+Soil amendment templates are used differently - they are used when applying  
+fertilizers with the bag tool (the "apply" tool action) and have no corresponding  
+garden objects. Note that the template manager has a pesticide list; this is left over  
+from when we had implemented pesticides and taking it out would make the garden  
+files unreadable. The icons and harvest item templates (hits) are a little  
+complicated: plants just have pointers (references) to them so that memory is not  
+used redundantly. This means the methods for assigning and streaming them are a  
+little complicated. 
+ 
+== utimelin.pas, dfm 
+Time line form. Displays (read-only) time line of year with frost dates and "normal"  
+planting/harvest dates for cultivar selected in list box. "Normal" dates are based on  
+parameters for the plant and the frost dates for the current climate. User can use this  
+window to decide when to plant various plants. Reaches right into  
+domain.garden.weather to use weather info; reaches into domain.templateManager  
+to get information on list of cultivars. This is OK because nothing is changed here.  
+No interactions between this window and anything else. Was thrown together  
+quickly. 
+ 
+== utitlech.pas, dfm 
+Graph title form. User can change graph title, axis titles, and choose whether to  
+auto-title axes (from aspects graphed) and whether to autoscale or input scale for  
+each axis. Called only from graph window. Graph window calls initializeForAxis  
+for each axis, then gets the data back after OK is clicked. Nothing has to be copied  
+as the graph window directly inspects the values of the interface elements. Some  
+complications arise from interdependence of axis title edit boxes and "auto-title"  
+check boxes. If "auto- title" is checked, the appropriate edit box becomes read-only. 
+ 
+== utlpmed.pas, dfm 
+Tool parameter list editor. Allows user to change lists of choices available when  
+doing a tool action. These are the lists that show up in the combo boxes in the  
+garden window toolbar when the user picks up a tool. What we are editing here is  
+GsToolRateOrAmountParam objects (utools), which know their type, units, and  
+bounds. Bounds are hard-coded with hardCodeBoundsForModelUnit (in utools).  
+The user can also export/import the information for use in other gardens. The list of  
+GsToolRateOrAmountParams is in the toolParamListManager (in the domain), and  
+the dialog makes a copy of that manager when it starts up and overwrites the  
+original if OK is pressed. The lists themselves cannot be created or deleted or  
+renamed. 
+The five lists are: 
+* carrying amount (for carrying soil or mulch - t/ha or t), 
+* adding amount for solids (for applying amendments - t/ha or t), 
+* adding amount for liquids (not used), 
+* planting depth (not used), 
+* mixing depth (for mixing soil - meters), and 
+* tool area (size of tool - m2). 
+The "amount per second" option is invisible and code that deals with it commented  
+out, because we have not implemented the code the implements that type of tool  
+action (it would be in ugscom). 
+ 
+== utools.pas 
+Several classes for tool use. 
+* GsToolRateOrAmountParam: Holds information on one parameter for a tool  
+action, such as how deep to dig or how much material to apply. When the user picks  
+up a tool and choices appear in the one or two combo boxes after the tool list in the  
+garden window toolbar, each one of the choices is one of these objects. Bounds are  
+hard-coded in this file. 
+* GsToolParamListManager: In the domain; keeps several lists of  
+GsToolRateOrAmountParams for use when displaying tool action options and  
+carrying out tool actions. The only lists that are used at this point are adding  
+amount for solids (for applying an amendment), carrying amount (for carrying soil  
+or mulch), mixing depth, and tool area. Tool area is used with all the mixing tools  
+to decide how much of the soil patch is affected by the tool action (tool area/soil  
+patch area). The tool params list editor (utlpmed) is used to edit these items. The  
+tool param list manager is saved in the garden file with the domain. 
+* GsToolAction: The tool action object has the job of creating the command to place  
+in the undo list and actually carry out what should happen after the mouse was  
+clicked. Each tool has a list of tool actions (which can be changed in the tool editor  
+- utooledt). The tool actions use case statements to decide several things about the  
+tool action that are necessary to carry it out - how many parameters it needs, the  
+string to put in the combo box, what command to create, etc. The types of tool  
+actions are a hard-coded list of constants. 
+* GsToolSettings: This object stores some information about a tool in the garden  
+file separate from the information stored in the tool file. This is so we can save the  
+position of each tool in the garden picture and whether the tool is visible or not.  
+When the garden file is opened this information is written over the information  
+from the tool file in the tool manager. There is actually no list of tool settings saved  
+in the domain, since this information is in the tool manager. On streaming in, the  
+information is copied into the current tool manager; on streaming out, the  
+information in the current tool manager is used to create a temporary tool settings  
+list which is streamed out. Look at the streamDataWithFiler and readDataWithFiler  
+functions in udomain for how this works. 
+* GsTool: A tool object, which carries out tool actions on soil patches and plants.  
+The tool object has some number of tool actions (a TListCollection), a name, a note  
+(PChar), several bitmaps (up, down, full, and masks for all these), and sounds to  
+play at various stages of mouse use. Tools are read from a tool file and stored in the  
+tool manager in the domain. Tools encapsulate the behavior of transparent bitmaps  
+as well as action handling. 
+* GsToolManager: Keeps and handles all the tools. Held onto by the domain. Has  
+code for locating tools at a cursor position, streaming tools, etc. Treats glove tool  
+specially, because it is "up" when all the other tools are down. 
+ 
+== utooledt.pas, dfm 
+Tool editor. Edits tools and their actions, pictures and sounds. Pictures are from  
+bitmaps (separate for down, up, and full states); sounds are from wav files (separate  
+for pick up, holding (loop), put down, starting use, using (loop), finishing use);  
+actions are chosen from a list of hard-coded possibilities. Each tool can have any set  
+of actions (including all of them). See utools for a description of how the tools and  
+tool manager work. The tool editor works by making a copy of the entire tool  
+manager at startup (from the one in the domain), then replacing the domain version  
+when OK is pressed. Note that this uses a lot of memory and resources and could  
+not work correctly if either is stressed. 
+ 
+== utr55.pas 
+This file contains only a constant array used in the SCS-TR55 method of peak  
+runoff rate from rainfall. 
+ 
+== utstream.pas 
+Functions to stream model templates to/from a tab-delimited text file. These  
+methods were removed from the object files because they made them too long. For  
+soil patches and plants there are separate streaming functions for version 0.90 and  
+version 1.0. For the weather there were no changes so there is only one function. If  
+there were a version 1.1, each object might need a third function to stream in/out  
+the correct fields. A few other objects have streamUsingTextFiler methods, namely  
+the drawing plant (udplant), 3D objects (uturt3d), icons (uicon), harvest item  
+templates (uharvprt), and soil amendments (uebag). These functions are in their  
+own files. 
+ 
+== uturt3d.pas 
+Defines several objects important in 3D plant drawing. 
+* KfMatrix: A matrix used to transform 3D points to produce new 3D points based  
+on current turtle rotations along X, Y, and Z axes. 
+* KfDrawingSurface: A device-independent representation of a canvas on which to  
+draw lines and triangles. 
+* KfIndexTriangle: A representation of a triangle as indexes into an array of points. 
+* KfObject3D: An object to be drawn in 3D - represented as an array of triangles  
+which refer to 3D points. 
+* KfTurtle: A turtle object that can be moved in 3D space and has an X, Y, and Z  
+rotation for drawing lines. 
+ 
+== uunits.pas 
+Functions for conversion of units in whole system. There are 32 unit sets, and each  
+unit set contains units that are inter-convertible. For example, the temperature unit  
+set contains degrees C and degrees F. The unit set must be saved and given during  
+any conversion so the function knows which code to use to convert the units.  
+Numbers cannot be converted between unit sets. The file also contains information  
+for displaying the units (the string to show, etc). 
+ 
+== uwait.pas, dfm 
+A little window that just shows a short message telling the user something is going  
+on and they should wait. Right now this window is only used if files are saved after  
+the user exits the program (if they click "Save and exit"). The form is created at  
+startup to make sure it is available at exit. 
+ 
+== uwindman.pas 
+Window manager. This class creates the forms that are to be created when the  
+domain is streamed in (if they are not created already, that is, if this is the first  
+garden opened in the session); and it manages the streaming of data about the  
+garden window, browser, graph window, and harvest window during file streaming.  
+Information saved is mainly positional (place on screen, size, position of splitter,  
+etc) and what is selected in the forms (the object in the browser, the current tool,  
+etc). Note that since the forms are not streamable objects, the window manager acts  
+as a proxy to the filer (ufiler) to stream the information for them. 
+ 
+======== Tab2asp program 
+ 
+This separate program (with its own project files) is used primarily to generate  
+several files of code that create the 800 or so aspects when the program starts up.  
+Code generation works from a data file (aspects.tab) with all information for the  
+aspects in tab-delimited format. The tab2asp program also does some other  
+housekeeping and comparison functions for general maintenance of the code. By the  
+buttons on the tab2asp form, these are as follows. 
+ 
+== Generate aspect code 
+The function discussed above (the program's primary function). 
+ 
+== Generate aspect report 
+Compares list of existing aspects (as read from aspects.tab) with model variables  
+marked in the code files uestruct, udplant and uebag. The report file (asp_rep.txt)  
+tells 1) what variables are in the aspects file but not in the Pascal files; 2) what  
+variables are in the Pascal files but not in the aspects file; and 3) what variables  
+have conflicting data types in the Pascal and aspects files. In uestruct, udplant and  
+uebag, aspect variables are designated by special codes in comments. The special  
+codes are: 
+* {aspects->start}: Start reading variables here. 
+* {object->plant}: Start reading variables for the "plant" object here. 
+* {access->params}: Start reading variables for the "params" data structure here. 
+* {ENUM}: Consider this variable an enumerated string variable, not just an  
+integer. 
+* {NA}: Don't look for an aspect for this variable. After each NA variable there is  
+usually an explanation of why there is no aspect for it. 
+* {aspects->stop}: Stop reading variables here. 
+ 
+== Generate group aspect report 
+Creates a report file (asp_grp.txt) showing discrepancies between the aspects file  
+(aspects.tab) and a groups tab-delimited file (created in the group editor by  
+exporting the groups). The report shows 1) which aspects are in aspects.tab but not  
+in groups.tab; 2) which aspects are in groups.tab but not in aspects.tab; and 3)  
+which aspects are in groups.tab twice. The report always produces some  
+discrepancies that are not real, mainly for aspects in aspects.tab that have hard- 
+coded array indexes. 
+ 
+== Generate button hints file from code 
+The long hints used for buttons, list boxes, etc come from a tab-delimited file called  
+hints.tab. If you add new windows or substantially change existing ones, you must  
+update hints.tab to reflect the changes. This function reads all the Pascal files in the  
+directory you choose, pulls out the names and types of all the "important" items on  
+each form, and writes out a new hints.tab file. It also asks you to choose an existing  
+hints.tab file, and writes the hints for any existing items in that file into the new  
+file. If you created a new form, for example, then ran this, you would end up with a  
+new hints file (newhints.tab) with all the old hints plus lines with blank hint cells  
+for the items on your new form. Which items are "important" is hard- coded below  
+with a list of enumerated item types (find the "componentConstants" list below). 
+ 
+== Merge aspects file with existing hints 
+Hints for each aspect are read when the program starts from a tab-delimited text  
+file, usually asphints.tab. If you add new aspects or delete aspects, you can run this  
+function to create a new aspect hints file (newhints.tab) from the aspects file  
+(aspects.tab) and your existing aspect hints file. For example, if you add two new  
+aspects then run this function, you will end up with a newhints.tab with all the  
+existing hints and blank cells on the lines for your two new aspects. Generate  
+aspects help file: Reads an aspects file (aspects.tab), an aspect hints file  
+(asphints.tab), and a groups file (groups.tab, exported from the group editor), and  
+creates an RTF (rich-text format) file with aspect hints for all the aspects in the  
+groups, ordered by group and the order they are in each group. The RTF file can be  
+read by Microsoft Word (and possibly other word processors) to format a document  
+for printing or for use in the help system. 
+ 
+======== Aspects.tab file 
+ 
+We also include here a description of what is in each column of the aspects.tab file.  
+Keeping the aspects information in the tab file and generating Pascal code from it  
+makes it easier to compare aspects (by simply sorting the file) and make changes to  
+many aspects at once. When you sort, make sure you keep the row of labels at the  
+top of the file. 
+ 
+== FieldID 
+A text string (no spaces, only alphanumeric) that uniquely identifies the aspect.  
+Often taken from the variable name in the object, but not always, and sometimes the  
+variable name changed later. The aspects.tab file should always be sorted by the  
+FieldID column when you are finished with it and when you run the tab2asp  
+program. The fieldIDs are named so that the objects come out sorted when the  
+FieldIDs are sorted. 
+ 
+== name 
+What shows in the browser (etc) when the aspect is shown. Actually, this column is  
+not used anymore because the aspect hints file (asphints.tab) has a "name" column  
+and we use that column instead to show in the browser, etc. So this is really  
+obsolete. If you want to change how an aspect shows in the program, change the  
+"name" column in asphints.tab (that does not require recompiling, either). 
+ 
+== fieldType 
+The data type of the aspect. The types are: float, integer, unsigned long, unsigned  
+char, string, file string (unused), color, boolean, icon, 3D object, enumerated list  
+(shown in the browser as a radio button or check box group), and harvest item  
+template. This list of constants is in uaspects.pas. You could add a new type by  
+adding it to this list and checking for any case statements you need to add it to.  
+NOTE that in each of the columns here that start with a number, only the initial  
+number is read by the tab2asp program, but the text is for your reference. It's best  
+never to type these cells but to copy and paste from another cell that contains the  
+same thing, so you don't get the wrong number for what you want. 
+ 
+== IndexType 
+The type of array this represents. The types are: none, soil layer (array of 10),  
+month (for weather, array of 12), s curve (array of 4 singles), soil texture triangle  
+(array of 3), male/female (array of 2), harvest item types (array of 12), weather  
+autocorrelation matrix (array of 3), MUSI coefficients (array of 4). This list of  
+constants is in uaspects.pas. You could add a new type by adding it to this list and  
+checking for any case statements you need to add it to. 
+ 
+== unitSet 
+The unit set. The list of 32 unit sets is in uunits. See that file for more on unit  
+conversions. 
+ 
+== unitModel 
+The type of unit (within its unit set) in which the model variable is stored. This is  
+very important because if this unit is wrong the browser will report the wrong  
+number. 
+ 
+== unitMetric 
+The type of unit (within its unit set) to show when the user chooses to set all units to  
+metric. Usually these are determined by the unit set (concentration, weight, etc). 
+ 
+== unitEnglish 
+The type of unit (within its unit set) to show when the user chooses to set all uints to  
+English. 
+ 
+== SLower, SUpper 
+The "soft" lower and upper bounds. Soft bounds are our recommended bounds for  
+displaying values. For input values, the user can override the soft bounds to input a  
+value outside of them. We made these up mostly by looking at the unit and variable  
+types and thinking of the normal garden scale (biomass, for example, will usually be  
+in grams or kilograms, not tons). 
+ 
+== HLower, HUpper 
+The "hard" lower and upper bounds. For input variables, the user cannot input a  
+value outside of them. Most of the hard bounds came from EPIC (see the Source  
+column below); some of them came from our own guesses as to what extreme values  
+might be. In some cases we might have set the hard bounds too restrictingly. We  
+tried to stop values from reaching extremes that might crash the simulation. Of  
+course read-only values need no bounds so they have mostly just initial display  
+meanings for output variables. 
+ 
+== Source 
+Where the hard or absolute bounds came from. Usually these are from EPIC, from  
+the unit set, or from our guesses. 
+ 
+== Type 
+Whether the variable is an input parameter, a state variable, or an output variable.  
+These distinctions are not extremely important or accurate. The "parameter" versus  
+everything else distinction is used in the group editor to choose what to look at, but  
+otherwise this column is not used by anything. 
+ 
+== ReadOnly 
+Whether the user can change the value for this aspect in the browser. We used to  
+have more changeable aspects, but in our run-through trying to make the code a  
+little less vulnerable to messy side effects, we removed a lot of these. In most cases  
+variables the user can change affect other variables either 1) right away (in which  
+case there will be a side effect function in the object for it), 2) during the next day of  
+simulation (in which case there will be no effect until you run the simulation), or 3)  
+not at all. It is not advisable to make read-only variables changeable without at least  
+perusing the code to look for potentially damaging side effects. 
+ 
+== HasHelp 
+Whether this aspect has a help topic in the help system. This column is not used  
+anymore because we decided not to implement separate help topics for all 800  
+aspects. 
+ 
+== Access 
+A VERY IMPORTANT COLUMN. This is how the data for this aspect is retrieved  
+from its model object. Any changes to model code which change variable names  
+MUST update this field, or the program will choke when it attempts to fetch data  
+for the aspect (when drawing the browser, group editor, or graph window). 
+ 
+== Transfer 
+Also important - HOW the data for this aspect is collected. 
+- MFD: The transfer type is MFD (MoveFieldData), a simple one-for-one data  
+transfer using the Access column string. 
+- S Curve, 3D object, harvest item: These is nearly the same as one-for-one transfer,  
+but a little fancy work is done in maintaining the special structures. 
+- BDConvert: Here the transfer type is a basic-derived (BD) conversion. In basic- 
+derived conversion, the next three sets of ten columns (D1, D2, D3) each come into  
+play. They specify alternate ways in which the aspect can be derived from the  
+simulation variable described in the Access column. For example, the aspect named  
+"Actual increase in biomass today" can be shown in its "basic" derivation as kg/m2  
+(under the "unitMetric" column), OR it can be shown in its "first derived"  
+derivation as grams (under the "D1 metric" column). The D1, D2, and D3 sets of  
+columns determine how each alternative derivation (up to three) is calculated from  
+the simulation variable. Note that so far we have no "D3" derivations. 
+ 
+The remaining columns in the file are as follows and repeat similar columns for the  
+derived representations. 
+ 
+D1 type, D1 set, D1 model, D1 metric, D1 English,  
+        D1 BSL, D1 BSU, D1 BHL, D1 BHU, D1 source 
+D2 type, D2 set, D2 model, D2 metric, D2 English,  
+        D2 BSL, D2 BSU, D2 BHL, D2 BHU, D2 source 
+D3 type, D3 set, D3 model, D3 metric, D3 English,  
+        D3 BSL, D3 BSU, D3 BHL, D3 BHU, D3 source 
+ 
+======== Conclusion 
+ 
+If there are any questions that remain unanswered by this programmer's guide,  
+please see our web site (http://www.gardenwithinsight.com) for updates, and send  
+us an e-mail (support@gardenwithinsight.com) if you don't find an answer there.  
+Thanks and good luck! 
+

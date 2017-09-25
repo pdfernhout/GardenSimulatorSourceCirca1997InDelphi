@@ -1,0 +1,8 @@
+The Garden with Insight(TM) garden simulator source code
+
+This output directory was included in the installation
+package because the 32-bit Delphi 2.0 project (gsim32.dpr)
+expects to place its output files (*.dcu, *.exe) in 
+an output20 directory under where the project file is found.
+See the file FILES.TXT in the main source directory
+for more information on the project files.

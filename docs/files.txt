@@ -1,0 +1,79 @@
+The Garden with Insight(TM) garden simulator source README.TXT
+Last updated: 10/1/97
+
+== License
+
+This software program, including all documentation, Delphi source code, and data files, is
+Copyright (c) 1997 Paul D. Fernhout and Cynthia F. Kurtz All Rights Reserved.
+Garden with Insight™ is a trademark of Paul D. Fernhout and Cynthia F. Kurtz. 
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+== For more information, contact:
+
+Kurtz-Fernhout Software
+http://www.gardenwithinsight.com
+support@gardenwithinsight.com
+
+== Files
+
+The files in this package are as follows.
+
+In the source directory,
+
+*.dfm -- Delphi 1.0 form files (see programmer's guide)
+*.pas -- Delphi Pascal files (1.0 or 2.0)
+
+gsimprj.dpr -- Delphi 1.0 project file
+gsimprj.res -- Delphi 1.0 resource file
+gsimprj.opt -- Delphi 1.0 options file
+
+gsim32.dpr -- Delphi 2.0 project file
+gsim32.res -- Delphi 2.0 resource file
+gsim32.dof -- Delphi 2.0 options file
+
+cursors.res -- Delphi 1.0 cursors resource file
+cursor32.res -- Delphi 2.0 cursors resource file
+
+aspects.tab -- Aspect information (see programmer's guide)
+
+In the Tab2Asp directory,
+(see programmer's guide for what the Tab2Asp program does)
+
+tab2asp.dpr -- Tab2Asp utility program project file (Delphi 1.0)
+tab2asp.res -- Tab2Asp utility program resource file (Delphi 1.0)
+tab2asp.opt -- Tab2Asp utility program options file (Delphi 1.0)
+tab2asp.exe -- Tab2Asp utility program (16-bit)
+
+tab2as32.dpr -- Tab2Asp utility program project file (Delphi 2.0)
+tab2as32.res -- Tab2Asp utility program resource file (Delphi 2.0)
+tab2as32.dof -- Tab2Asp utility program options file (Delphi 2.0)
+tab2as32.exe -- Tab2Asp utility program (32-bit)
+
+== Output directories
+
+The 16-bit Delphi 1.0 project is configured to write its output files to a 
+directory called "output" under the source code directory, so we
+have included a directory called "output" in the source code
+installation package. The 32-bit Delphi 2.0 project expects a 
+directory called "output20". We suggest you leave both directories
+around unless you are sure you won't be using the other version
+of Delphi.
+
+== Programmer's Guide
+
+The programmer's guide describing each source code file
+is called gwiprog.txt (in the docs directory).
+
